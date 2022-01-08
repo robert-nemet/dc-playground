@@ -1,12 +1,9 @@
 FROM golang:latest as builder
 
 WORKDIR /app
-COPY go.mod /app/
-COPY main.go /app/
-ADD internal /app/
+COPY . /app/
 
-
-RUN go mod download
+RUN go get ./...
 RUN go build -o app
 
 FROM golang:buster
