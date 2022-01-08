@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"dc-playground/handlers"
-	"dc-playground/services"
+	"dc-playground/internal/handlers"
+	"dc-playground/internal/services"
 )
 
 func main() {
@@ -14,6 +14,6 @@ func main() {
 	eh := handlers.NewEchoHandler(es)
 
 	http.HandleFunc("/echo", eh.EchoHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":9999", nil))
 
 }

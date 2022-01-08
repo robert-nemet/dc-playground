@@ -1,6 +1,6 @@
 package services
 
-import "dc-playground/model"
+import "dc-playground/internal/model"
 
 type EchoSvc interface {
 	EchoMsg(echo model.Echo) string

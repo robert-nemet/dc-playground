@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"dc-playground/model"
-	"dc-playground/services"
+	"dc-playground/internal/model"
+	"dc-playground/internal/services"
 )
 
 type EchoHandlers interface {
@@ -25,15 +25,17 @@ func NewEchoHandler(svc services.EchoSvc) EchoHandlers {
 
 func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 	var msg model.Echo
-	var body []byte
-	_, err := r.Body.Read(body)
+	err := json.NewDecoder(r.Body).Decode(&msg)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
 	}
-	json.Unmarshal(body, &msg)
 
 	rsp := e.svc.EchoMsg(msg)
 
-	w.Write([]byte(fmt.Sprintf("{ 'echo': %s}", rsp)))
+	er := model.EchoRsp{
+		Rsp: rsp,
+	}
+
+	json.NewEncoder(w).Encode(er)
 }
