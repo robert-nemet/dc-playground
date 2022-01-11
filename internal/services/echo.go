@@ -1,6 +1,9 @@
 package services
 
-import "dc-playground/internal/model"
+import (
+	"dc-playground/internal/model"
+	"log"
+)
 
 type EchoSvc interface {
 	EchoMsg(echo model.Echo) string
@@ -13,5 +16,6 @@ func NewEchoSvc() EchoSvc {
 }
 
 func (e echosvcimpl) EchoMsg(echo model.Echo) string {
+	log.Println(echo)
 	return echo.Msg
 }
