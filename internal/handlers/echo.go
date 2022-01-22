@@ -33,8 +33,6 @@ func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Received msg: %v\n", msg)
-
 	rsp := e.svc.EchoMsg(msg)
 
 	er := model.EchoRsp{

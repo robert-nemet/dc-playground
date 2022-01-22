@@ -6,13 +6,29 @@ services:
     build: .
     ports:
       - "9999:9999"
+    volumes:
+      - ./configs:/app/configs
+    depends_on:
+      - liquibase
+
 
   next:
     container_name: echo2
     build: .
     ports:
       - "8888:8888"
+    depends_on:
+      - pg
   
+  liquibase:
+    container_name: db_updater
+    image: liquibase/liquibase:4.7.0
+    volumes:
+      - ./liquibase:/liquibase/changelog
+    command: liquibase --url="jdbc:postgresql://pg:5432/docker" --changeLogFile=./changelog/changelog.xml --username=root --password=password update
+    depends_on:
+      - pg
+
   pg:
     container_name: pg
     image: postgres:13.1
@@ -25,11 +41,8 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
-      - APP_DB_USER=docker
-      - APP_DB_PASS=docker
-      - APP_DB_NAME=docker
+      - POSTGRES_DB=docker
     volumes:
       - ./db:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
-  

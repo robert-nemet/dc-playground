@@ -10,3 +10,9 @@ POST http://localhost:9999/v2/echo
 {
     "msg": "Hello World"
 }
+
+###
+POST http://localhost:9999/counter
+
+###
+GET http://localhost:9999/counter
