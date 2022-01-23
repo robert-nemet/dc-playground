@@ -11,21 +11,16 @@ import (
 )
 
 const (
-	writeSqlStatement  = `INSERT INTO counters (key, counter) VALUES ($1, $2)`
-	updateSqlStatement = `UPDATE counters SET counter=$2 WHERE key=$1`
-	readSqlStatement   = `SELECT counter FROM counters where key=$1`
+	pg_writeSqlStatement  = `INSERT INTO counters (key, counter) VALUES ($1, $2)`
+	pg_updateSqlStatement = `UPDATE counters SET counter=$2 WHERE key=$1`
+	pg_readSqlStatement   = `SELECT counter FROM counters WHERE key=$1`
 )
 
-type DB interface {
-	GetCnt() (i int, e error)
-	SaveCnt() error
-}
-
-type database struct {
+type pgdatabase struct {
 	db *sql.DB
 }
 
-func NewDBService(cfg config.AppConfig) DB {
+func NewPGService(cfg config.AppConfig) DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		cfg.DbHost, cfg.DbPort, cfg.DbUser, cfg.DbPassword, cfg.DbName)
@@ -40,16 +35,15 @@ func NewDBService(cfg config.AppConfig) DB {
 	if err != nil {
 		panic(err)
 	}
-
-	return database{
+	return pgdatabase{
 		db: db,
 	}
 }
 
-func (db database) GetCnt() (i int, e error) {
+func (db pgdatabase) GetCnt() (i int, e error) {
 	weekday := time.Now().Weekday()
 	var cnt int
-	row := db.db.QueryRow(readSqlStatement, weekday)
+	row := db.db.QueryRow(pg_readSqlStatement, weekday)
 	if e = row.Scan(&cnt); e == sql.ErrNoRows {
 		log.Printf("No rows for %s day.", weekday)
 		cnt = 0
@@ -58,16 +52,16 @@ func (db database) GetCnt() (i int, e error) {
 	return cnt, e
 }
 
-func (db database) SaveCnt() error {
+func (db pgdatabase) SaveCnt() error {
 	weekday := time.Now().Weekday()
 	counter, err := db.GetCnt()
 	if err == nil {
 		log.Printf("Inc for %s, cnt %d", weekday, counter)
 		counter++
 		if counter == 1 {
-			_, err = db.db.Exec(writeSqlStatement, weekday, counter)
+			_, err = db.db.Exec(pg_writeSqlStatement, weekday, counter)
 		} else {
-			_, err = db.db.Exec(updateSqlStatement, weekday, counter)
+			_, err = db.db.Exec(pg_updateSqlStatement, weekday, counter)
 		}
 	}
 	return err

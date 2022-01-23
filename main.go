@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -29,6 +30,8 @@ func main() {
 	r.HandleFunc("/counter", ch.ReadCount).Methods(http.MethodGet)
 
 	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":9999", nil))
+	port := fmt.Sprintf(":%v", cfg.AppPort)
+	fmt.Println("Start on " + port)
+	log.Fatal(http.ListenAndServe(port, nil))
 
 }
