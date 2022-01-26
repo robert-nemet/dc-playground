@@ -5,31 +5,85 @@ services:
     container_name: echo
     build: .
     ports:
-      - "9999:9999"
+      - 9999:9999
+    volumes:
+      - ./configs:/app/configs
+    depends_on:
+      - liquibase_pg
+    restart: always
+
 
   next:
     container_name: echo2
     build: .
     ports:
-      - "8888:8888"
+      - 8888:8888
+    depends_on:
+      - liquibase_maria
+    environment:
+      DB_HOST: maria
+      DB_PORT: 3306
+      DB_USER: docker
+      DB_PASSWORD: password
+      DB_NAME: docker
+      DB_TYPE: MARIA
+      APP_PORT: 8888
+    restart: always
+
+
+  liquibase_pg:
+    container_name: pg_updater
+    image: liquibase/liquibase:4.7.0
+    volumes:
+      - ./liquibase:/liquibase/changelog
+    command: liquibase --url="jdbc:postgresql://pg:5432/docker" --changeLogFile=./changelog/changelog.xml --username=root --password=password update
+    depends_on:
+      - pg
+
   
+  liquibase_maria:
+    container_name: mariadb_updater
+    image: liquibase/liquibase:4.7.0
+    volumes:
+      - ./liquibase:/liquibase/changelog
+    command: liquibase --url="jdbc:mariadb://maria:3306/docker" --changeLogFile=./changelog/changelog.xml --username=docker --password=password  update
+    depends_on:
+      - maria
+
   pg:
     container_name: pg
     image: postgres:13.1
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 45s
       interval: 10s
       retries: 10
     restart: always
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=password
-      - APP_DB_USER=docker
-      - APP_DB_PASS=docker
-      - APP_DB_NAME=docker
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: docker
     volumes:
       - ./db:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
   
+  maria:
+    container_name: maria
+    image: mariadb:10.7
+    healthcheck:
+      test: mysqladmin ping 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD
+      timeout: 45s
+      interval: 10s
+      retries: 10
+      start_period: 20s
+    restart: always
+    environment:
+      MARIADB_USER: docker
+      MARIADB_PASSWORD: password
+      MARIADB_DATABASE: docker
+      MARIADB_ROOT_PASSWORD: example
+    volumes:
+      - ./maria:/var/lib/mysql
+    ports:
+      - 3306:3306

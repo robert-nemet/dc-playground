@@ -1,12 +1,24 @@
-POST http://localhost:9999/echo
+POST http://localhost:8888/echo
 
 {
     "msg": "Hello World"
 }
 
 ####
-POST http://localhost:9999/v2/echo
+POST http://localhost:9999/echo
 
 {
     "msg": "Hello World"
 }
+
+###
+POST http://localhost:9999/counter
+
+###
+GET http://localhost:9999/counter
+
+###
+POST http://localhost:8888/counter
+
+###
+GET http://localhost:8888/counter

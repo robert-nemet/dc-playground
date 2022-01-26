@@ -12,6 +12,4 @@ WORKDIR /app
 
 COPY --from=builder /app/app /app/
 
-EXPOSE 9999
-
 ENTRYPOINT [ "/app/app" ]
