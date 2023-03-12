@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 
 	"dc-playground/internal/model"
@@ -28,8 +28,17 @@ func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 	var msg model.Echo
 	err := json.NewDecoder(r.Body).Decode(&msg)
 	if err != nil {
-		log.Fatalln(err)
-		fmt.Fprint(w, err)
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.EchoRsp{Rsp: err.Error()})
+		return
+	}
+
+	if rand.Intn(100) < 10 {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.Pong{
+			Msg: "Internal Server Error",
+		})
 		return
 	}
 

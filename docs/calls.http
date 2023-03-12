@@ -11,6 +11,12 @@ POST http://localhost:9999/echo
     "msg": "Hello World"
 }
 
+####
+POST http://localhost:9999/ping
+
+{
+    "msg": "Hello World5"
+}
 ###
 POST http://localhost:9999/counter
 
