@@ -36,8 +36,8 @@ func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 
 	if rand.Intn(100) < 10 {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(model.Pong{
-			Msg: "Internal Server Error",
+		json.NewEncoder(w).Encode(model.EchoRsp{
+			Rsp: "Internal Server Error",
 		})
 		return
 	}
