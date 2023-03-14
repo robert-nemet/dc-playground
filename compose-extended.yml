@@ -6,7 +6,10 @@ services:
     image: peterevans/vegeta
     volumes:
     - ./vegeta:/vegeta
-    command: vegeta attack --targets=/vegeta/targets.tests -duration=60s -output /vegeta/output
+    command: vegeta attack --targets=/vegeta/targets.tests -duration=5m -output /vegeta/output
+    profiles:
+      - observer
+      - all
 
   app:
     container_name: echo

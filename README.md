@@ -41,3 +41,9 @@ DB_TYPE="PG"
 ## Issues
 
 MariaDB requires to delete ./maria folder for each change to the docker-compose file, if changes affects mariadb(like passwords, etc.)
+
+## Observations
+
+Start setup with `make start_observer`. On `http://localhost:3000` you will see Grafana. Login with `admin` and `grafana`. Prometheus is added as data source.
+To start load test run `make restart COMPOSE_FILE=compose-extended.yml APP=vegeta`. Duration is defined in `compose-extended.yml` file.
+

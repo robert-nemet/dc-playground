@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -27,7 +28,7 @@ func Instrument(handler func(w http.ResponseWriter, r *http.Request)) http.Handl
 		start := time.Now()
 		wrapped := &wrapresponsewriter{w, http.StatusOK}
 		handler(wrapped, r)
-		histogram.WithLabelValues(http.StatusText(wrapped.statusCode), r.URL.Path).Observe(time.Since(start).Seconds())
+		histogram.WithLabelValues(strconv.Itoa(wrapped.statusCode), r.URL.Path).Observe(time.Since(start).Seconds())
 	}
 }
 
