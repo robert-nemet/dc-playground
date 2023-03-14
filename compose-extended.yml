@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  vegeta:
+    container_name: vegeta
+    image: peterevans/vegeta
+    volumes:
+    - ./vegeta:/vegeta
+    command: vegeta attack --targets=/vegeta/targets.tests -duration=5m -output /vegeta/output
+    profiles:
+      - observer
+      - all
+
+  app:
+    container_name: echo
+    build: .
+    ports:
+      - 9999:9999
+    volumes:
+      - ./configs:/app/configs
+    depends_on:
+      - liquibase_pg
+    restart: always
+    profiles:
+      - observer
+      - all
+
+
+  liquibase_pg:
+    container_name: pg_updater
+    image: liquibase/liquibase:4.7.0
+    volumes:
+      - ./liquibase:/liquibase/changelog
+    command: liquibase --url="jdbc:postgresql://pg:5432/docker" --changeLogFile=./changelog/changelog.xml --username=root --password=password update
+    depends_on:
+      - pg
+    profiles:
+      - observer
+      - all
+
+  pg:
+    container_name: pg
+    image: postgres:13.1
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: docker
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - 5432:5432
+    profiles:
+      - observer
+      - all
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    profiles:
+      - all
+      - observer
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+    profiles:
+      - all
+      - observer
+      
+volumes:
+  prom_data:

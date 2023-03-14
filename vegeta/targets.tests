@@ -1,0 +1,8 @@
+POST http://echo:9999/ping
+Content-Type: application/json
+@/vegeta/ping.json
+
+POST http://echo:9999/ping
+Content-Type: application/json
+@/vegeta/badping.json
+

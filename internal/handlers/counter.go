@@ -4,6 +4,7 @@ import (
 	"dc-playground/internal/model"
 	"dc-playground/internal/services"
 	"encoding/json"
+	"math/rand"
 	"net/http"
 )
 
@@ -32,6 +33,11 @@ func (ch counterHandler) SaveCount(w http.ResponseWriter, r *http.Request) {
 		rsp.Msg = err.Error()
 	}
 
+	if rand.Intn(100) < 5 {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(w).Encode(rsp)
 }
 
@@ -44,6 +50,12 @@ func (ch counterHandler) ReadCount(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(rsp)
 		return
 	}
+
+	if rand.Intn(100) < 5 {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	rsp := model.CountRsp{
 		Cnt: v,
 	}
