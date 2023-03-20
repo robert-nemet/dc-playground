@@ -59,6 +59,32 @@ services:
       - observer
       - all
   
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monitoring_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+    profiles:
+      - all
+      - observer
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - 8090:8080
+    profiles:
+      - all
+      - observer
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -70,6 +96,9 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
+    links:
+      - cadvisor:cadvisor
+      - node-exporter:node-exporter
     profiles:
       - all
       - observer
@@ -84,7 +113,9 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/source/dashboards:/etc/dashboards
     profiles:
       - all
       - observer

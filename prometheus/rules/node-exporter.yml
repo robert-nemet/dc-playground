@@ -1,0 +1,8 @@
+groups:
+- name: node-exporter
+  rules:
+  - record: node:node_num_cpu:sum
+    expr: |-
+        count by (instance) (sum by (instance, cpu) (
+          node_cpu_seconds_total{job="prometheus"}
+        ))
