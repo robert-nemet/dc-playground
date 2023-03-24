@@ -3,7 +3,6 @@ package handlers
 import (
 	"dc-playground/internal/model"
 	"encoding/json"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -23,7 +22,6 @@ func (p *pingHandler) PingHandler(w http.ResponseWriter, r *http.Request) {
 	var msg model.Ping
 	err := json.NewDecoder(r.Body).Decode(&msg)
 	if err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(model.Pong{Msg: err.Error()})
 		return

@@ -10,7 +10,8 @@ import (
 	"dc-playground/internal/middleware"
 	"dc-playground/internal/services"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	chimid "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -20,23 +21,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	cs := services.NewDBService(cfg)
 	ch := handlers.NewCounterHandler(cs)
 
 	es := services.NewEchoSvc()
 	eh := handlers.NewEchoHandler(es)
 
-	r := mux.NewRouter()
-	r.HandleFunc("/echo", middleware.Instrument(eh.EchoHandler)).Methods(http.MethodPost)
-	r.HandleFunc("/counter", middleware.Instrument(ch.SaveCount)).Methods(http.MethodPost)
-	r.HandleFunc("/counter", middleware.Instrument(ch.ReadCount)).Methods(http.MethodGet)
+	r := chi.NewRouter()
+	r.Use(middleware.NewMiddleware().Instrument)
+	r.Use(chimid.Logger)
+	r.Post("/echo", eh.EchoHandler)
+	r.Post("/counter", ch.SaveCount)
+	r.Get("/counter", ch.ReadCount)
 
-	r.HandleFunc("/ping", middleware.Instrument(handlers.NewPingHandler().PingHandler)).Methods(http.MethodPost)
+	r.Post("/ping", handlers.NewPingHandler().PingHandler)
 
-	http.Handle("/", r)
-	http.Handle("/metrics", promhttp.Handler())
+	r.Handle("/metrics", promhttp.Handler())
 	port := fmt.Sprintf(":%v", cfg.AppPort)
 	fmt.Println("Start on " + port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(port, r))
 
 }

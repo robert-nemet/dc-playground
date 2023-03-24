@@ -1,11 +1,11 @@
 APP_PORT=9999
-DB_HOST="pg"
+# DB_HOST="pg"
 DB_PORT=5432
 DB_USER="root"
 DB_PASSWORD="password"
 DB_NAME="docker"
 DB_TYPE="PG"
-# DB_HOST="localhost"
+DB_HOST="localhost"
 # DB_PORT=3306
 # DB_USER="docker"
 # DB_PASSWORD="password"
