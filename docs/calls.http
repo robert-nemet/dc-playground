@@ -30,4 +30,4 @@ POST http://localhost:8888/counter
 GET http://localhost:8888/counter
 
 ###
-GET http://localhost:9999/metrics
+GET http://localhost:8888/metrics

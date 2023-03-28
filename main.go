@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"dc-playground/internal/config"
 	"dc-playground/internal/handlers"
@@ -25,8 +28,7 @@ func main() {
 	cs := services.NewDBService(cfg)
 	ch := handlers.NewCounterHandler(cs)
 
-	es := services.NewEchoSvc()
-	eh := handlers.NewEchoHandler(es)
+	eh := handlers.NewEchoHandler(cfg)
 
 	r := chi.NewRouter()
 	r.Use(middleware.NewMiddleware().Instrument)
@@ -35,11 +37,23 @@ func main() {
 	r.Post("/counter", ch.SaveCount)
 	r.Get("/counter", ch.ReadCount)
 
-	r.Post("/ping", handlers.NewPingHandler().PingHandler)
+	r.Post("/ping", handlers.NewPingHandler(cfg).PingHandler)
 
 	r.Handle("/metrics", promhttp.Handler())
 	port := fmt.Sprintf(":%v", cfg.AppPort)
 	fmt.Println("Start on " + port)
+
+	go func() {
+		for {
+			body := []byte(`{"msg":"ping"}`)
+			_, err := http.Post(cfg.Target+"/ping", "application/json", bytes.NewBuffer(body))
+			if err != nil {
+				fmt.Println(err)
+			}
+			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+		}
+	}()
+
 	log.Fatal(http.ListenAndServe(port, r))
 
 }

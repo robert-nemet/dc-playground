@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 
+	"dc-playground/internal/config"
 	"dc-playground/internal/model"
-	"dc-playground/internal/services"
 )
 
 type EchoHandlers interface {
@@ -14,12 +14,12 @@ type EchoHandlers interface {
 }
 
 type echohndl struct {
-	svc services.EchoSvc
+	cfg config.AppConfig
 }
 
-func NewEchoHandler(svc services.EchoSvc) EchoHandlers {
+func NewEchoHandler(cfg config.AppConfig) EchoHandlers {
 	return echohndl{
-		svc: svc,
+		cfg: cfg,
 	}
 }
 
@@ -32,7 +32,7 @@ func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rand.Intn(100) < 10 {
+	if rand.Intn(100) < e.cfg.ErrorRate {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.EchoRsp{
 			Rsp: "Internal Server Error",
@@ -40,7 +40,7 @@ func (e echohndl) EchoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rsp := e.svc.EchoMsg(msg)
+	rsp := msg.Msg
 
 	er := model.EchoRsp{
 		Rsp: rsp,

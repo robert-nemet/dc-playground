@@ -11,7 +11,11 @@ import (
 var (
 	duration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "http_request_duration_seconds",
-	}, []string{"code", "method", "path"})
+	}, []string{"status_code", "method", "path"})
+
+	concurentRequests = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "http_concurrent_requests",
+	})
 )
 
 type Middleware interface {
@@ -22,8 +26,7 @@ type middleware struct {
 }
 
 func NewMiddleware() Middleware {
-	prometheus.MustRegister(duration)
-
+	prometheus.MustRegister(duration, concurentRequests)
 	return &middleware{}
 }
 
@@ -34,11 +37,12 @@ type wrapresponsewriter struct {
 
 func (m *middleware) Instrument(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		wrapped := &wrapresponsewriter{ResponseWriter: w, statusCode: 200}
+		concurentRequests.Inc()
 		start := time.Now()
+		wrapped := &wrapresponsewriter{ResponseWriter: w, statusCode: 200}
 		next.ServeHTTP(wrapped, r)
-		end := time.Now()
-		duration.WithLabelValues(strconv.Itoa(wrapped.statusCode), r.Method, r.URL.Path).Observe(end.Sub(start).Seconds())
+		concurentRequests.Dec()
+		duration.WithLabelValues(strconv.Itoa(wrapped.statusCode), r.Method, r.URL.Path).Observe(time.Since(start).Seconds())
 	})
 }
 

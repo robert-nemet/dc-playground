@@ -1,13 +1,13 @@
-APP_PORT=9999
+APP_PORT=8888
 DB_HOST="pg"
 DB_PORT=5432
 DB_USER="root"
 DB_PASSWORD="password"
 DB_NAME="docker"
 DB_TYPE="PG"
-TARGET="http://beta:8888"
-ERROR_RATE=10
-DELAY=3000
+TARGET="http://echo:9999"
+ERROR_RATE=60
+DELAY=5000
 # DB_HOST="localhost"
 # DB_PORT=3306
 # DB_USER="docker"

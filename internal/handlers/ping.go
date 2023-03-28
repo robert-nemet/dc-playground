@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"dc-playground/internal/config"
 	"dc-playground/internal/model"
 	"encoding/json"
 	"math/rand"
@@ -12,10 +13,14 @@ type PingHandlers interface {
 	PingHandler(w http.ResponseWriter, r *http.Request)
 }
 
-type pingHandler struct{}
+type pingHandler struct {
+	cfg config.AppConfig
+}
 
-func NewPingHandler() PingHandlers {
-	return &pingHandler{}
+func NewPingHandler(cfg config.AppConfig) PingHandlers {
+	return &pingHandler{
+		cfg: cfg,
+	}
 }
 
 func (p *pingHandler) PingHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +32,7 @@ func (p *pingHandler) PingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rand.Intn(100) < 10 {
+	if rand.Intn(100) < p.cfg.ErrorRate {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.Pong{
 			Msg: "Internal Server Error",

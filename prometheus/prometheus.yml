@@ -30,6 +30,7 @@ scrape_configs:
   static_configs:
   - targets:
     - echo:9999
+    - beta:8888
 - job_name: 'docker'
   static_configs:
     - targets: ['host.docker.internal:9323']
