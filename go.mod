@@ -3,8 +3,8 @@ module dc-playground
 go 1.20
 
 require (
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.4
 	github.com/prometheus/client_golang v1.14.0
 	github.com/spf13/viper v1.10.1

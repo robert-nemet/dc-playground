@@ -9,13 +9,25 @@ import (
 )
 
 var (
-	histogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	duration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "http_request_duration_seconds",
-	}, []string{"status_code", "path"})
+	}, []string{"status_code", "method", "path"})
+
+	concurentRequests = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "http_concurrent_requests",
+	})
 )
 
-func init() {
-	prometheus.MustRegister(histogram)
+type Middleware interface {
+	Instrument(next http.Handler) http.Handler
+}
+
+type middleware struct {
+}
+
+func NewMiddleware() Middleware {
+	prometheus.MustRegister(duration, concurentRequests)
+	return &middleware{}
 }
 
 type wrapresponsewriter struct {
@@ -23,13 +35,15 @@ type wrapresponsewriter struct {
 	statusCode int
 }
 
-func Instrument(handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (m *middleware) Instrument(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		concurentRequests.Inc()
 		start := time.Now()
-		wrapped := &wrapresponsewriter{w, http.StatusOK}
-		handler(wrapped, r)
-		histogram.WithLabelValues(strconv.Itoa(wrapped.statusCode), r.URL.Path).Observe(time.Since(start).Seconds())
-	}
+		wrapped := &wrapresponsewriter{ResponseWriter: w, statusCode: 200}
+		next.ServeHTTP(wrapped, r)
+		concurentRequests.Dec()
+		duration.WithLabelValues(strconv.Itoa(wrapped.statusCode), r.Method, r.URL.Path).Observe(time.Since(start).Seconds())
+	})
 }
 
 func (w *wrapresponsewriter) WriteHeader(statusCode int) {

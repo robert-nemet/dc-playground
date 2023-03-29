@@ -6,3 +6,10 @@ POST http://echo:9999/ping
 Content-Type: application/json
 @/vegeta/badping.json
 
+POST http://beta:8888/ping
+Content-Type: application/json
+@/vegeta/ping.json
+
+POST http://beta:8888/echo
+Content-Type: application/json
+@/vegeta/ping.json

@@ -25,6 +25,20 @@ services:
       - observer
       - all
 
+  beta:
+    container_name: beta
+    build: .
+    ports:
+      - 8888:8888
+    volumes:
+      - ./beta:/app/configs
+    depends_on:
+      - liquibase_pg
+    restart: always
+    profiles:
+      - observer
+      - all
+
 
   liquibase_pg:
     container_name: pg_updater

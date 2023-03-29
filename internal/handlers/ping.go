@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"dc-playground/internal/config"
 	"dc-playground/internal/model"
 	"encoding/json"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -13,23 +13,26 @@ type PingHandlers interface {
 	PingHandler(w http.ResponseWriter, r *http.Request)
 }
 
-type pingHandler struct{}
+type pingHandler struct {
+	cfg config.AppConfig
+}
 
-func NewPingHandler() PingHandlers {
-	return &pingHandler{}
+func NewPingHandler(cfg config.AppConfig) PingHandlers {
+	return &pingHandler{
+		cfg: cfg,
+	}
 }
 
 func (p *pingHandler) PingHandler(w http.ResponseWriter, r *http.Request) {
 	var msg model.Ping
 	err := json.NewDecoder(r.Body).Decode(&msg)
 	if err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(model.Pong{Msg: err.Error()})
 		return
 	}
 
-	if rand.Intn(100) < 10 {
+	if rand.Intn(100) < p.cfg.ErrorRate {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.Pong{
 			Msg: "Internal Server Error",

@@ -12,6 +12,8 @@ type AppConfig struct {
 	DbPassword string `mapstructure:"DB_PASSWORD"`
 	DbName     string `mapstructure:"DB_NAME"`
 	DbType     string `mapstructure:"DB_TYPE"`
+	Target     string `mapstructure:"TARGET"`
+	ErrorRate  int    `mapstructure:"ERROR_RATE"`
 }
 
 func LoadConfig() (config AppConfig, err error) {
@@ -27,6 +29,9 @@ func LoadConfig() (config AppConfig, err error) {
 	viper.BindEnv("DB_NAME", "DB_NAME")
 	viper.BindEnv("DB_TYPE", "DB_TYPE")
 	viper.BindEnv("APP_PORT", "APP_PORT")
+	viper.BindEnv("TARGET", "TARGET")
+	viper.BindEnv("ERROR_RATE", "ERROR_RATE")
+	viper.SetDefault("ERROR_RATE", 10)
 	viper.SetDefault("DB_TYPE", "PG")
 	viper.AutomaticEnv()
 
