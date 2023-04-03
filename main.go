@@ -39,6 +39,13 @@ func main() {
 
 	r.Post("/ping", handlers.NewPingHandler(cfg).PingHandler)
 
+	if cfg.KafkaBroker != "none" {
+		go services.StartConsumer(cfg.KafkaBroker, cfg.KafkaTopic)
+
+		r.Post("/producer", handlers.NewKafkaHandler(services.NewKafkaService(cfg.KafkaBroker), cfg.KafkaTopic).KafkaHandler)
+
+	}
+
 	r.Handle("/metrics", promhttp.Handler())
 	port := fmt.Sprintf(":%v", cfg.AppPort)
 	fmt.Println("Start on " + port)

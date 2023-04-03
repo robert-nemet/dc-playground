@@ -31,3 +31,10 @@ GET http://localhost:8888/counter
 
 ###
 GET http://localhost:8888/metrics
+
+###
+POST http://localhost:9999/producer
+
+{
+    "msg": "Hello World!!"
+}
