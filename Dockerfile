@@ -1,12 +1,15 @@
-FROM golang:latest as builder
+ARG GO_VERSION=1.20.3
+FROM golang:${GO_VERSION}-buster as builder
 
 WORKDIR /app
-COPY . /app/
 
-RUN go mod tidy
+COPY go.mod go.sum /app/
+RUN go mod download -x
+
+COPY . /app/
 RUN go build -o app
 
-FROM golang:buster
+FROM debian:buster
 
 WORKDIR /app
 

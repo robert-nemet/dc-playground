@@ -1,0 +1,16 @@
+**/beta/
+**/configs/
+**/db/
+**/docs/
+**/grafana/
+**/liquibase/
+**/maria/
+**/prometheus/
+**/vegeteta/
+.gitignore
+.dockerignore
+**/compose*
+Dockerfile
+License
+Makefile
+Readme.md
