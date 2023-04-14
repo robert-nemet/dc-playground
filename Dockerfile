@@ -9,10 +9,11 @@ RUN go mod download -x
 COPY . /app/
 RUN go build -o app
 
-FROM debian:buster
+FROM gcr.io/distroless/base-debian11
 
+USER nonroot:nonroot
 WORKDIR /app
 
-COPY --from=builder /app/app /app/
+COPY --chown=nonroot:nonroot --from=builder /app/app /app/
 
 ENTRYPOINT [ "/app/app" ]
